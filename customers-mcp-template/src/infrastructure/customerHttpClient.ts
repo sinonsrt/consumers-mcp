@@ -1,4 +1,4 @@
-import { type Customer } from "../domain/Customer.ts"
+import { type CreatedCustomer, type Customer } from "../domain/Customer.ts"
 
 export class CustomerHttpClient {
     private baseUrl: string
@@ -10,5 +10,25 @@ export class CustomerHttpClient {
     async listCustomers(): Promise<Customer[]> {
         const response = await fetch(`${this.baseUrl}/customers`)
         return response.json() as Promise<Customer[]>
+    }
+
+    async createCustomer(customer: Customer): Promise<CreatedCustomer> {
+        const response = await fetch(`${this.baseUrl}/customers`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(customer)
+        })
+
+        return response.json() as Promise<CreatedCustomer>
+    }
+
+    async getCustomerById(id: string): Promise<Customer | null> {
+        const response = await fetch(`${this.baseUrl}/customers/${id}`)
+
+        if (response.status === 404) return null
+
+        return response.json() as Promise<Customer>
     }
 }
