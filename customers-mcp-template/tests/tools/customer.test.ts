@@ -1,7 +1,7 @@
 import test, { after, before, describe } from "node:test"
 import { Client } from "@modelcontextprotocol/sdk/client"
 import assert from "node:assert"
-import { type CreatedCustomer, type Customer } from "../../src/domain/Customer.ts"
+import { type CustomerMutation, type Customer } from "../../src/domain/Customer.ts"
 import { createTestClient } from "../helper.ts"
 
 type CustomersResult = {
@@ -10,8 +10,8 @@ type CustomersResult = {
     }
 }
 
-type CreateCustomerResult = {
-    structuredContent: CreatedCustomer
+type CustomerMutationResult = {
+    structuredContent: CustomerMutation
 }
 
 type GetCustomerResult = {
@@ -48,10 +48,35 @@ describe('Customer mcp suit', () => {
         const result = await client.callTool({
             name: 'create_customer',
             arguments: customer
-        }) as unknown as CreateCustomerResult
+        }) as unknown as CustomerMutationResult
 
         assert.ok(result.structuredContent.id, 'should return id')
         assert.deepStrictEqual(result.structuredContent.message, `user ${customer.name} created!`, 'should return message correct')
+    })
+
+    test('should update customer', async () => {
+        const newCustomer = {
+            name: 'John Doe',
+            phone: '1239424421'
+        }
+
+        const { structuredContent: { id } } = await client.callTool({
+            name: 'create_customer',
+            arguments: newCustomer
+        }) as unknown as CustomerMutationResult
+
+        const customer = {
+            _id: id,
+            name: 'Batman',
+            phone: '1239424428'
+        }
+        const result = await client.callTool({
+            name: 'update_customer',
+            arguments: customer
+        }) as unknown as CustomerMutationResult
+
+        assert.deepStrictEqual(result.structuredContent.id, id, 'should return the correct id')
+        assert.ok(result.structuredContent.message, 'should return a message')
     })
 
     test('should get a customer', async () => {
@@ -63,7 +88,7 @@ describe('Customer mcp suit', () => {
         await client.callTool({
             name: 'create_customer',
             arguments: customer
-        }) as unknown as CreateCustomerResult
+        }) as unknown as CustomerMutationResult
 
         const result = await client.callTool({
             name: 'get_customer',
@@ -74,5 +99,27 @@ describe('Customer mcp suit', () => {
 
         assert.ok(result.structuredContent.customer._id, 'should return id')
         assert.deepStrictEqual(result.structuredContent.customer.name, customer.name, 'should return name correct')
+    })
+
+    test('should delete a customer', async () => {
+        const newCustomer = {
+            name: 'John Doe',
+            phone: '1239424421'
+        }
+
+        const { structuredContent: { id } } = await client.callTool({
+            name: 'create_customer',
+            arguments: newCustomer
+        }) as unknown as CustomerMutationResult
+
+        const result = await client.callTool({
+            name: 'delete_customer',
+            arguments: {
+                id
+            }
+        }) as unknown as CustomerMutationResult
+
+        assert.deepStrictEqual(result.structuredContent.id, id, 'should return the correct id')
+        assert.ok(result.structuredContent.message, 'should return a message')
     })
 })

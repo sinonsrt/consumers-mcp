@@ -1,4 +1,4 @@
-import type { CustomerQuery, CreatedCustomer, Customer } from "../domain/Customer.ts"
+import type { CustomerQuery, CustomerMutation, Customer, CustomerUpdate } from "../domain/Customer.ts"
 import { CustomerHttpClient } from "../infrastructure/customerHttpClient.ts"
 
 export class CustomerService {
@@ -12,8 +12,16 @@ export class CustomerService {
         return this.client.listCustomers()
     }
 
-    async createCustomer(customer: Customer): Promise<CreatedCustomer> {
+    async createCustomer(customer: Customer): Promise<CustomerMutation> {
         return this.client.createCustomer(customer);
+    }
+
+    async updateCustomer(customer: CustomerUpdate): Promise<CustomerMutation> {
+        return this.client.updateCustomer(customer);
+    }
+
+    async deleteCustomer(id: string): Promise<CustomerMutation> {
+        return this.client.deleteCustomer(id);
     }
 
     async getCustomer(query: CustomerQuery): Promise<Customer | null> {

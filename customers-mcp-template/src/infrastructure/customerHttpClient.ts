@@ -1,4 +1,4 @@
-import { type CreatedCustomer, type Customer } from "../domain/Customer.ts"
+import type { CustomerMutation, Customer, CustomerUpdate } from "../domain/Customer.ts"
 
 export class CustomerHttpClient {
     private baseUrl: string
@@ -12,7 +12,15 @@ export class CustomerHttpClient {
         return response.json() as Promise<Customer[]>
     }
 
-    async createCustomer(customer: Customer): Promise<CreatedCustomer> {
+    async getCustomerById(id: string): Promise<Customer | null> {
+        const response = await fetch(`${this.baseUrl}/customers/${id}`)
+
+        if (response.status === 404) return null
+
+        return response.json() as Promise<Customer>
+    }
+
+    async createCustomer(customer: Customer): Promise<CustomerMutation> {
         const response = await fetch(`${this.baseUrl}/customers`, {
             method: 'POST',
             headers: {
@@ -21,14 +29,23 @@ export class CustomerHttpClient {
             body: JSON.stringify(customer)
         })
 
-        return response.json() as Promise<CreatedCustomer>
+        return response.json() as Promise<CustomerMutation>
     }
 
-    async getCustomerById(id: string): Promise<Customer | null> {
-        const response = await fetch(`${this.baseUrl}/customers/${id}`)
+    async updateCustomer({ _id, ...customer }: CustomerUpdate): Promise<CustomerMutation> {
+        const response = await fetch(`${this.baseUrl}/customers/${_id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(customer)
+        })
 
-        if (response.status === 404) return null
+        return response.json() as Promise<CustomerMutation>
+    }
 
-        return response.json() as Promise<Customer>
+    async deleteCustomer(id: string): Promise<CustomerMutation> {
+        const response = await fetch(`${this.baseUrl}/customers/${id}`, { method: 'DELETE' })
+        return response.json() as Promise<CustomerMutation>
     }
 }
