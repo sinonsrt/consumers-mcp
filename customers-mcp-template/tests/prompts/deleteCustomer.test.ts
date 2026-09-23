@@ -3,8 +3,7 @@ import { Client } from "@modelcontextprotocol/sdk/client"
 import assert from "node:assert"
 import { createTestClient } from "../helper.ts"
 
-
-describe('find_customer_prompt', () => {
+describe('delete_customer_prompot', () => {
     let client: Client
 
     before(async () => {
@@ -15,16 +14,16 @@ describe('find_customer_prompt', () => {
         await client.close()
     })
 
-    test('should return the find_customer_prompt', async () => {
+    test('should return the delete_customer_prompot', async () => {
         const result = await client.getPrompt({
-            name: 'find_costumer_prompt',
+            name: 'delete_costumer_prompt',
             arguments: {
-                name: 'John'
+                id: 'id-123'
             }
         })
+
         const text = result.messages[0].content
 
-        assert.ok('text' in text && text.text.includes('get_customer'), 'should reference get_customer')
-        assert.ok('text' in text && text.text.includes('John'), 'should reference the query')
+        assert.ok('text' in text && text.text.includes('id-123'), 'should reference the rigth id')
     })
 })
